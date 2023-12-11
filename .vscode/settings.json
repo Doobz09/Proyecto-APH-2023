@@ -1,0 +1,14 @@
+{
+  "C_Cpp.intelliSenseEngine": "default",
+  "files.associations": {
+    "lvgl.h": "c",
+    "esp_lvgl_port.h": "c",
+    "esp_lcd_panel_io.h": "c",
+    "esp_lcd_panel_ops.h": "c",
+    "i2c.h": "c",
+    "esp_timer.h": "c"
+  },
+  "idf.portWin": "COM7",
+  "idf.flashType": "UART",
+  "idf.adapterTargetName": "esp32"
+}
