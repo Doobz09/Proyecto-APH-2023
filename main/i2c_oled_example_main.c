@@ -21,6 +21,7 @@ void app_main(void)
     lv_obj_align(label, LV_ALIGN_TOP_MID, 0, 0);
 
     vTaskDelay(pdMS_TO_TICKS(2000));
+    /*HOLA*/
 
  
     
