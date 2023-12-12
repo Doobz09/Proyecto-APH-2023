@@ -12,6 +12,11 @@
 #include "lvgl.h"
 #include "esp_lvgl_port.h"
 #include<string.h>
+#include"GPIO.h"
+
+
+
+
 
 #if CONFIG_EXAMPLE_LCD_CONTROLLER_SH1107
 #include "esp_lcd_sh1107.h"
@@ -56,7 +61,13 @@ static bool notify_lvgl_flush_ready(esp_lcd_panel_io_handle_t panel_io, esp_lcd_
     return false;
 }
 
+extern lv_disp_t * disp;
+extern char state[100];
+
 extern lv_disp_t * init_oled(void);
+extern void init_gpios(void);
+extern void actualizar_entradas(void);
+extern void imprimir_oled(lv_obj_t *label);
 
 
 #endif

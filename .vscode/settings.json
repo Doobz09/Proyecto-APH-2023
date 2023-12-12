@@ -6,9 +6,16 @@
     "esp_lcd_panel_io.h": "c",
     "esp_lcd_panel_ops.h": "c",
     "i2c.h": "c",
-    "esp_timer.h": "c"
+    "esp_timer.h": "c",
+    "gpio.h": "c",
+    "bsp.h": "c",
+    "random": "c",
+    "istream": "c",
+    "ostream": "c",
+    "streambuf": "c",
+    "regex": "c"
   },
-  "idf.portWin": "COM7",
+  "idf.portWin": "COM6",
   "idf.flashType": "UART",
   "idf.adapterTargetName": "esp32"
 }

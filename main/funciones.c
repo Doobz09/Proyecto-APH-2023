@@ -1,6 +1,7 @@
 
 #include "funciones.h"
 
+char state[100];
 lv_disp_t * init_oled(void){
     ESP_LOGI(TAG, "Initialize I2C bus");
     i2c_config_t i2c_conf = {
@@ -85,4 +86,39 @@ lv_disp_t * init_oled(void){
 
 
     return(disp);
+}
+
+void init_gpios(void){
+    /*ENTRADAS*/
+    GpioModeInput(BTN1);
+    GpioPullUpEnable(BTN1);
+
+    /*SALIDAS*/
+    GpioModeOutput(LED1);
+    GpioModeOutput(LED2);
+    GpioModeOutput(LED3);
+
+
+}
+
+void actualizar_entradas(void){
+    if(!GpioDigitalRead(BTN1)){
+        GpioDigitalWrite(LED1,GPIO_HIGH);
+    }
+    else{
+        GpioDigitalWrite(LED1,GPIO_LOW);
+
+    }
+
+}
+
+void imprimir_oled(lv_obj_t *label){
+    static uint32_t i=1;
+    sprintf(state,"Cuenta: %ld",i++);
+    lv_label_set_text(label, state);
+
+   
+    
+
+
 }

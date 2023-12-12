@@ -1,7 +1,7 @@
 {
     "version":            "1",
     "project_name":       "i2c_oled",
-    "project_version":    "12c2671-dirty",
+    "project_version":    "e4e48a5-dirty",
     "project_path":       "C:/Users/mende/Documents/ESP32_IDF/I2c-Oled/i2c_oled",
     "idf_path":           "C:/ESP32/esp-idf",
     "build_dir":          "C:/Users/mende/Documents/ESP32_IDF/I2c-Oled/i2c_oled/build",
@@ -835,7 +835,7 @@
             "managed_reqs": [],
             "managed_priv_reqs": [ "espressif__esp_lcd_sh1107", "espressif__esp_lvgl_port", "lvgl__lvgl" ],
             "file": "C:/Users/mende/Documents/ESP32_IDF/I2c-Oled/i2c_oled/build/esp-idf/main/libmain.a",
-            "sources": [ "C:/Users/mende/Documents/ESP32_IDF/I2c-Oled/i2c_oled/main/funciones.c", "C:/Users/mende/Documents/ESP32_IDF/I2c-Oled/i2c_oled/main/i2c_oled_example_main.c" ],
+            "sources": [ "C:/Users/mende/Documents/ESP32_IDF/I2c-Oled/i2c_oled/main/GPIO.c", "C:/Users/mende/Documents/ESP32_IDF/I2c-Oled/i2c_oled/main/funciones.c", "C:/Users/mende/Documents/ESP32_IDF/I2c-Oled/i2c_oled/main/i2c_oled_example_main.c" ],
             "include_dirs": [ "." ]
         },
         "mbedtls": {
