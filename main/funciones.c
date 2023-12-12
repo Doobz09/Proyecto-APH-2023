@@ -2,6 +2,21 @@
 #include "funciones.h"
 
 char state[100];
+
+uint32_t BotonEncState =off;
+uint32_t EstadoSistema =off;
+uint32_t adc_val1;
+double tv;
+double tr;
+double y;
+double temp;
+
+
+extern uint32_t espacio_total_personas=10;
+uint32_t espacio_ahora_personas=0;
+
+
+
 lv_disp_t * init_oled(void){
     ESP_LOGI(TAG, "Initialize I2C bus");
     i2c_config_t i2c_conf = {
@@ -90,35 +105,119 @@ lv_disp_t * init_oled(void){
 
 void init_gpios(void){
     /*ENTRADAS*/
+
     GpioModeInput(BTN1);
     GpioPullUpEnable(BTN1);
+
+    GpioModeInput(BTN2);
+    GpioPullUpEnable(BTN2);
+
+    GpioModeInput(GPIO15);
+    GpioPullUpEnable(GPIO15);
+
+
 
     /*SALIDAS*/
     GpioModeOutput(LED1);
     GpioModeOutput(LED2);
     GpioModeOutput(LED3);
+    GpioModeOutput(LED4);
 
+
+}
+void init_adc(void){
+    adc1_config_channel_atten(ADC1_CHANNEL_0, ADC_ATTEN_DB_11);
+    adc1_config_width(ADC_WIDTH_BIT_12);
 
 }
 
 void actualizar_entradas(void){
-    if(!GpioDigitalRead(BTN1)){
-        GpioDigitalWrite(LED1,GPIO_HIGH);
-    }
-    else{
-        GpioDigitalWrite(LED1,GPIO_LOW);
 
+    if(!GpioDigitalRead(BTN1) && BotonEncState==off){
+        BotonEncState=on;
+        EstadoSistema=on;
+    }
+
+    if(EstadoSistema==on){
+        /*LEEMOS LA TEMPERATURA DEL SALON */
+        adc_val1 = adc1_get_raw(ADC1_CHANNEL_0);
+
+        /*SENSOR S_IN*/
+
+        if(!GpioDigitalRead(S_IN)){
+            while(!GpioDigitalRead(S_IN));
+            if(espacio_ahora_personas<espacio_total_personas){
+                espacio_ahora_personas++;    
+            }
+        }
+
+        if(!GpioDigitalRead(GPIO15)){
+            while(!GpioDigitalRead(GPIO15));
+            if(espacio_ahora_personas>0){
+                espacio_ahora_personas--;    
+            }
+        }
+
+
+
+
+    }
+    
+
+
+
+}
+
+void actualizar_salidas(void){
+    static uint32_t bandera = 1;
+    if(BotonEncState==on && bandera==1){
+        GpioDigitalWrite(LED1,GPIO_HIGH);
+        bandera=0;
+    }
+
+    if(BotonEncState==on){
+        tv = ((3.3)*(adc_val1))/4095.0;
+        tr = ((tv)*(10000.0))/(3.3-tv);
+         y = log(tr/10000.0);
+         y = (1.0/298.15)+(y*(1.0/4050.0));
+        temp = 1.0/y;
+        temp = temp -273.15;
     }
 
 }
 
 void imprimir_oled(lv_obj_t *label){
-    static uint32_t i=1;
-    sprintf(state,"Cuenta: %ld",i++);
-    lv_label_set_text(label, state);
 
-   
+    static uint32_t bandera =1;
     
+    if(BotonEncState==on && bandera==1){
+    sprintf(state,"Sistema: ON");
+    lv_label_set_text(label, state);
+    bandera=0;
+    }
+
+    if(BotonEncState==on){
+        sprintf(state,"Sistema: ON\nDoor: Closed\nTemp:%.2f°C",temp);
+        lv_label_set_text(label, state);
+
+    }
+
+}
+void imprimir_terminal(){
+    static uint32_t bandera =1;
+    
+    if(BotonEncState==on && bandera==1){
+    sprintf(state,"Sistema: ON");
+    printf("%s", state);
+    bandera=0;
+    }
+
+    if(BotonEncState==on){
+        sprintf(state,"Sistema: ON  |  Door: Closed  |  Temp:%.2f°C  | Personas: %ld de %ld  |  \n",temp,espacio_ahora_personas,espacio_total_personas);
+        printf("%s", state);
+
+    }
+
 
 
 }

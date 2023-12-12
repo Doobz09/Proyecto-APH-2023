@@ -3,14 +3,19 @@
 
 
 lv_disp_t * disp;
+#define STACK_SIZE 1024
 
-
+void vTaskEntradas(void* pvParameters);
+esp_err_t create_tasks(void);
 
 void app_main(void)
 {
 
+
     init_gpios();
+    init_adc();
     disp = init_oled();
+    create_tasks();
 
     lv_obj_t *scr = lv_disp_get_scr_act(disp);
     lv_obj_t *label = lv_label_create(scr);
@@ -20,17 +25,47 @@ void app_main(void)
     lv_obj_set_width(label, disp->driver->hor_res);
     lv_obj_align(label, LV_ALIGN_TOP_MID, 0, 0);
 
-    vTaskDelay(pdMS_TO_TICKS(2000));
+    printf("Sistema: OFF\n");
+
     /*HOLA*/
 
  
     
     while(1){
-        actualizar_entradas();
+        actualizar_salidas();
         imprimir_oled(label);
-        vTaskDelay(pdMS_TO_TICKS(500));
+        imprimir_terminal();
+        vTaskDelay(pdMS_TO_TICKS(150));
     }
 
     
+}
+
+
+
+esp_err_t create_tasks(void){
+    static uint8_t ucParameterToPass;
+    TaskHandle_t xHandle = NULL;
+
+    xTaskCreate(vTaskEntradas,
+                "vTaskEntradas",
+                STACK_SIZE,
+                 &ucParameterToPass,
+                 1,
+                 &xHandle);
+
+    return ESP_OK;
+}
+
+void vTaskEntradas(void* pvParameters){
+
+    while(1){
+        actualizar_entradas();
+        vTaskDelay(pdMS_TO_TICKS(50));
+
+    }
+    
+
+
 }
 
