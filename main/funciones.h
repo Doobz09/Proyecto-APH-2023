@@ -21,6 +21,17 @@ enum STATE{
     on,
 
 };
+
+enum AUTOSTATE{
+    AUTO,
+    ON,
+
+};
+enum COOLSTATE{
+    COOL,
+    HEAT,
+
+};
 #define S_IN BTN2
 
 #if CONFIG_EXAMPLE_LCD_CONTROLLER_SH1107
@@ -69,7 +80,20 @@ static bool notify_lvgl_flush_ready(esp_lcd_panel_io_handle_t panel_io, esp_lcd_
 
 extern uint32_t BotonEncState;
 extern uint32_t EstadoSistema;
+extern uint32_t EstadoPuerta;
+extern uint32_t temp_corporal;
+extern char s_puerta[10];
+extern char s_auto[10];
+extern char s_cool[10];
 extern uint32_t adc_val1;
+extern uint32_t adc_val2;
+
+extern uint32_t estado_boton_auto;
+extern uint32_t estado_boton_cool;
+
+extern uint32_t set_point;
+
+
 extern double tv;
 extern double tr;
 extern double y;
@@ -77,7 +101,14 @@ extern double temp;
 
 extern uint32_t espacio_personas;
 extern uint32_t espacio_ahora_personas;
+extern uint32_t mensaje_no_hay_espacio ;
+extern uint32_t divisor;
 
+extern uint32_t tem_min;
+extern uint32_t tem_max;
+extern uint32_t mensaje_temperatura;
+
+extern uint32_t estado_alarma;
 
 extern lv_disp_t * disp;
 extern char state[100];
@@ -89,5 +120,6 @@ extern void imprimir_oled(lv_obj_t *label);
 extern void actualizar_salidas(void);
 extern void init_adc(void);
 extern void imprimir_terminal(void);
+extern void alarma(void);
 
 #endif

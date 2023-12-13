@@ -2,17 +2,39 @@
 #include "funciones.h"
 
 char state[100];
+char s_puerta[10];
+char s_auto[10];
+char s_cool[10];
+uint32_t divisor = 4095/100;
+uint32_t temp_corporal;
+uint32_t set_point=28;
+
 
 uint32_t BotonEncState =off;
 uint32_t EstadoSistema =off;
+uint32_t EstadoPuerta=off;
+uint32_t mensaje_no_hay_espacio = off;
 uint32_t adc_val1;
+uint32_t adc_val2;
+
+uint32_t mensaje_temperatura=off;
+uint32_t tem_min=8;
+uint32_t tem_max=40;
+
+uint32_t estado_alarma=off;
+
+uint32_t estado_boton_auto=AUTO;
+uint32_t estado_boton_cool= COOL;
+
+
+
 double tv;
 double tr;
 double y;
 double temp;
 
 
-extern uint32_t espacio_total_personas=10;
+extern uint32_t espacio_total_personas=3;
 uint32_t espacio_ahora_personas=0;
 
 
@@ -106,27 +128,53 @@ lv_disp_t * init_oled(void){
 void init_gpios(void){
     /*ENTRADAS*/
 
-    GpioModeInput(BTN1);
+    GpioModeInput(BTN1);/*GPIO18*/
     GpioPullUpEnable(BTN1);
 
-    GpioModeInput(BTN2);
+    GpioModeInput(BTN2); /*GPIO19*/
     GpioPullUpEnable(BTN2);
 
-    GpioModeInput(GPIO15);
+    GpioModeInput(GPIO15); /*GPIO15*/
     GpioPullUpEnable(GPIO15);
 
 
+    GpioModeInput(GPIO23);
+    GpioPullUpEnable(GPIO23);
+
+    GpioModeInput(GPIO27);
+    GpioPullUpEnable(GPIO27);
+
+
+
+/*GPIO5 OCUPADO POR EL LED 8*/
 
     /*SALIDAS*/
-    GpioModeOutput(LED1);
-    GpioModeOutput(LED2);
-    GpioModeOutput(LED3);
-    GpioModeOutput(LED4);
+    GpioModeOutput(LED1); /*GPIO17*/
+    GpioModeOutput(LED2); /*GPO16*/
+    GpioModeOutput(LED3);/*GPIO4*/
+    GpioModeOutput(LED4); /*GPIO2*/
+    GpioModeOutput(LED8);
+
+    /*RGB*/
+    GpioModeOutput(LEDR);/*GPIO14*/
+    GpioModeOutput(LEDG);/*GPIO13*/
+    GpioModeOutput(LEDB);/*GPIO12*/
+
+    /*EMPIEZAN APAGADOS LOS RGB*/
+    GpioDigitalWrite(LEDR,GPIO_HIGH);
+    GpioDigitalWrite(LEDG,GPIO_HIGH);
+    GpioDigitalWrite(LEDB,GPIO_HIGH);
+
+    GpioDigitalWrite(LED8,GPIO_LOW);
 
 
 }
 void init_adc(void){
+
+    /*CONFIGURAMOS LOS ADC USAMOS EL ADC1 CANAL 0 DONDE ESTA EL SENSOR Y EL CANAL 4 DONDE SIMULAMOS EL OTRO */
+    /*RESOLUCION DE 12 BITS MAXIMO VALOR 4095 ATENUACION 11 PARA TENER UN VALOR DE 3.3 EN VOLTAJE*/
     adc1_config_channel_atten(ADC1_CHANNEL_0, ADC_ATTEN_DB_11);
+    adc1_config_channel_atten(ADC1_CHANNEL_4, ADC_ATTEN_DB_11);/*PIN32*/
     adc1_config_width(ADC_WIDTH_BIT_12);
 
 }
@@ -142,13 +190,27 @@ void actualizar_entradas(void){
         /*LEEMOS LA TEMPERATURA DEL SALON */
         adc_val1 = adc1_get_raw(ADC1_CHANNEL_0);
 
+        /*LEEMOS TEMPERATURA CORPORAL*/
+        adc_val2 = adc1_get_raw(ADC1_CHANNEL_4);
+
         /*SENSOR S_IN*/
 
         if(!GpioDigitalRead(S_IN)){
             while(!GpioDigitalRead(S_IN));
-            if(espacio_ahora_personas<espacio_total_personas){
-                espacio_ahora_personas++;    
+
+            if(temp_corporal<tem_min || temp_corporal>tem_max){
+                mensaje_temperatura=on;
+                estado_alarma=on;
             }
+
+            else if(espacio_ahora_personas<espacio_total_personas){
+                    espacio_ahora_personas++;   
+                    EstadoPuerta=on; 
+            }
+            else{
+                mensaje_no_hay_espacio=on;
+            }
+  
         }
 
         if(!GpioDigitalRead(GPIO15)){
@@ -158,8 +220,17 @@ void actualizar_entradas(void){
             }
         }
 
+        if(!GpioDigitalRead(GPIO23)){
+            while(!GpioDigitalRead(GPIO23));
+            estado_boton_auto=!estado_boton_auto;
+        }
 
+        if(!GpioDigitalRead(GPIO27)){
+            while(!GpioDigitalRead(GPIO27));
+            estado_boton_cool=!estado_boton_cool;
+        }
 
+        
 
     }
     
@@ -171,18 +242,42 @@ void actualizar_entradas(void){
 void actualizar_salidas(void){
     static uint32_t bandera = 1;
     if(BotonEncState==on && bandera==1){
-        GpioDigitalWrite(LED1,GPIO_HIGH);
+        GpioDigitalWrite(LED8,GPIO_HIGH);
         bandera=0;
     }
 
-    if(BotonEncState==on){
+    if(EstadoSistema==on){
         tv = ((3.3)*(adc_val1))/4095.0;
         tr = ((tv)*(10000.0))/(3.3-tv);
          y = log(tr/10000.0);
          y = (1.0/298.15)+(y*(1.0/4050.0));
         temp = 1.0/y;
         temp = temp -273.15;
+
+
+        temp_corporal = adc_val2/divisor;
+
+        if(EstadoPuerta==on)
+            GpioDigitalWrite(LED4,GPIO_HIGH);
+        else
+            GpioDigitalWrite(LED4,GPIO_LOW);
+
+        if(estado_boton_auto==AUTO)
+            sprintf(s_auto,"AUTO");
+        else
+            sprintf(s_auto,"ON");
+
+        if(estado_boton_cool==COOL)
+            sprintf(s_cool,"COOL");
+        else
+            sprintf(s_cool,"HEAT");
+
+
+        
     }
+
+    
+    
 
 }
 
@@ -197,8 +292,27 @@ void imprimir_oled(lv_obj_t *label){
     }
 
     if(BotonEncState==on){
-        sprintf(state,"Sistema: ON\nDoor: Closed\nTemp:%.2f°C",temp);
-        lv_label_set_text(label, state);
+
+        if(EstadoPuerta==on){
+            sprintf(s_puerta,"OPEN");
+        }
+        else
+            sprintf(s_puerta,"CLOSED");
+
+        if(mensaje_temperatura==on){
+            lv_label_set_text(label, "Temp_Out_Of_Range");
+        }
+
+        else if(mensaje_no_hay_espacio==on){
+                lv_label_set_text(label, "We are Full, wait");
+
+        }
+        else{
+            sprintf(state,"Sistema: ON\nDoor: %s\nTemp:%.2f°C\nFan:%s/%s",s_puerta,temp,s_auto,s_cool);
+            lv_label_set_text(label, state);
+        }
+
+        
 
     }
 
@@ -213,11 +327,60 @@ void imprimir_terminal(){
     }
 
     if(BotonEncState==on){
-        sprintf(state,"Sistema: ON  |  Door: Closed  |  Temp:%.2f°C  | Personas: %ld de %ld  |  \n",temp,espacio_ahora_personas,espacio_total_personas);
+
+        if(EstadoPuerta==on){
+            sprintf(s_puerta,"OPEN");
+        }
+
+        
+
+        sprintf(state,"Sistema: ON  |  Door: %s  |  Temp:%.2f°C  | Personas: %ld de %ld  | TempCorp: %ld°C\n",s_puerta,temp,espacio_ahora_personas,espacio_total_personas,temp_corporal);
         printf("%s", state);
+
+
+        if(EstadoPuerta==on){
+            printf("\n\nDOOR:OPEN\n\n");
+            vTaskDelay(pdMS_TO_TICKS(5000));
+            sprintf(s_puerta,"CLOSED");
+            EstadoPuerta=off;
+            
+        }
+        if(mensaje_temperatura==on){
+            printf("\n\nTemp_Out_Of_Range\n\n");
+            vTaskDelay(pdMS_TO_TICKS(5000));
+            mensaje_temperatura=off;
+            estado_alarma=off;
+
+        }
+
+        else if(mensaje_no_hay_espacio==on){
+                printf("\n\nWe are Full, wait\n\n");
+                vTaskDelay(pdMS_TO_TICKS(1000));
+                mensaje_no_hay_espacio=off;
+
+        }
 
     }
 
 
+
+}
+
+void alarma(void){
+    if(estado_alarma==on){
+        GpioDigitalWrite(LEDR,GPIO_LOW);
+        GpioDigitalWrite(LEDB,GPIO_HIGH);
+        vTaskDelay(pdMS_TO_TICKS(100));
+        GpioDigitalWrite(LEDB,GPIO_LOW);
+        GpioDigitalWrite(LEDR,GPIO_HIGH);
+        vTaskDelay(pdMS_TO_TICKS(100));
+    }
+    else
+    {
+        GpioDigitalWrite(LEDR,GPIO_HIGH);
+        GpioDigitalWrite(LEDB,GPIO_HIGH);
+    }
+    
+    
 
 }

@@ -6,6 +6,7 @@ lv_disp_t * disp;
 #define STACK_SIZE 1024
 
 void vTaskEntradas(void* pvParameters);
+void vTasKAlarma(void* pvParameters);
 esp_err_t create_tasks(void);
 
 void app_main(void)
@@ -26,6 +27,7 @@ void app_main(void)
     lv_obj_align(label, LV_ALIGN_TOP_MID, 0, 0);
 
     printf("Sistema: OFF\n");
+    sprintf(s_puerta,"CLOSED");
 
     /*HOLA*/
 
@@ -54,6 +56,13 @@ esp_err_t create_tasks(void){
                  1,
                  &xHandle);
 
+    xTaskCreate(vTasKAlarma,
+                "vTasKAlarma",
+                STACK_SIZE,
+                 &ucParameterToPass,
+                 1,
+                 &xHandle);
+
     return ESP_OK;
 }
 
@@ -68,4 +77,14 @@ void vTaskEntradas(void* pvParameters){
 
 
 }
+
+void vTasKAlarma(void* pvParameters){
+    while(1){
+        alarma();
+        vTaskDelay(pdMS_TO_TICKS(50));  
+    }
+
+}
+
+
 
