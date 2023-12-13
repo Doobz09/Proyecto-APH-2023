@@ -181,9 +181,10 @@ void init_adc(void){
 
 void actualizar_entradas(void){
 
-    if(!GpioDigitalRead(BTN1) && BotonEncState==off){
+    if(!GpioDigitalRead(BTN1)){
+        while(!GpioDigitalRead(BTN1));
         BotonEncState=on;
-        EstadoSistema=on;
+        EstadoSistema=!EstadoSistema;
     }
 
     if(EstadoSistema==on){
@@ -241,16 +242,29 @@ void actualizar_entradas(void){
 
 void actualizar_salidas(void){
     static uint32_t bandera = 1;
-    if(BotonEncState==on && bandera==1){
+    if(EstadoSistema==on && bandera==1){
         GpioDigitalWrite(LED8,GPIO_HIGH);
         bandera=0;
     }
 
+    if(EstadoSistema==off){
+        GpioDigitalWrite(LED8,GPIO_LOW);
+        bandera=1;
+        mensaje_temperatura=off;
+        estado_alarma=off;
+        EstadoPuerta=off;
+        mensaje_no_hay_espacio=off;
+        espacio_ahora_personas=0;
+        estado_boton_auto=AUTO;
+        estado_boton_cool= COOL;
+        GpioDigitalWrite(LED1,GPIO_LOW);
+    }
+
     if(EstadoSistema==on){
-        tv = ((3.3)*(adc_val1))/4095.0;
-        tr = ((tv)*(10000.0))/(3.3-tv);
+        tv = 3.3 * adc_val1/4095.0;
+        tr = tv * 10000.0/(3.3-tv);
          y = log(tr/10000.0);
-         y = (1.0/298.15)+(y*(1.0/4050.0));
+         y = (1.0/298.15)+(y * (1.0/4050.0));
         temp = 1.0/y;
         temp = temp -273.15;
 
@@ -284,14 +298,20 @@ void actualizar_salidas(void){
 void imprimir_oled(lv_obj_t *label){
 
     static uint32_t bandera =1;
+    if(EstadoSistema==off){
+        sprintf(state,"Sistema: OFF");
+        lv_label_set_text(label, state);
+        bandera=1;
+
+    }
     
-    if(BotonEncState==on && bandera==1){
+    if(EstadoSistema==on && bandera==1){
     sprintf(state,"Sistema: ON");
     lv_label_set_text(label, state);
     bandera=0;
     }
 
-    if(BotonEncState==on){
+    if(EstadoSistema==on){
 
         if(EstadoPuerta==on){
             sprintf(s_puerta,"OPEN");
@@ -308,7 +328,7 @@ void imprimir_oled(lv_obj_t *label){
 
         }
         else{
-            sprintf(state,"Sistema: ON\nDoor: %s\nTemp:%.2f°C\nFan:%s/%s",s_puerta,temp,s_auto,s_cool);
+            sprintf(state,"TemCorp:%ld°C\nDoor: %s\nTemp:%.2f°C\nFan:%s/%s",temp_corporal,s_puerta,temp,s_auto,s_cool);
             lv_label_set_text(label, state);
         }
 
@@ -319,14 +339,15 @@ void imprimir_oled(lv_obj_t *label){
 }
 void imprimir_terminal(){
     static uint32_t bandera =1;
-    
-    if(BotonEncState==on && bandera==1){
-    sprintf(state,"Sistema: ON");
-    printf("%s", state);
-    bandera=0;
-    }
 
-    if(BotonEncState==on){
+    if(EstadoSistema==off && bandera ==1){
+        printf("\n\nSISTEMA: OFF\n\n");
+        bandera=0;
+    }
+        
+
+    if(EstadoSistema==on){
+        bandera=1;
 
         if(EstadoPuerta==on){
             sprintf(s_puerta,"OPEN");
@@ -382,5 +403,34 @@ void alarma(void){
     }
     
     
+
+}
+
+extern void fan(void)
+{
+    if(EstadoSistema==on){
+
+        if(estado_boton_auto==AUTO && estado_boton_cool==COOL){
+            if(temp>set_point)
+                GpioDigitalWrite(LED1,GPIO_HIGH);
+            else
+                GpioDigitalWrite(LED1,GPIO_LOW);
+        }
+        else if(estado_boton_auto==AUTO && estado_boton_cool==HEAT){
+            if(temp<set_point)
+                GpioDigitalWrite(LED1,GPIO_HIGH);
+            else
+                GpioDigitalWrite(LED1,GPIO_LOW);
+        }
+
+        else if(estado_boton_auto==ON && estado_boton_cool==COOL){
+            GpioDigitalWrite(LED1,GPIO_HIGH);
+        }
+
+        else
+            GpioDigitalWrite(LED1,GPIO_LOW);
+
+
+    }
 
 }

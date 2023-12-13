@@ -7,6 +7,7 @@ lv_disp_t * disp;
 
 void vTaskEntradas(void* pvParameters);
 void vTasKAlarma(void* pvParameters);
+void vTasKFan(void* pvParameters);
 esp_err_t create_tasks(void);
 
 void app_main(void)
@@ -26,7 +27,6 @@ void app_main(void)
     lv_obj_set_width(label, disp->driver->hor_res);
     lv_obj_align(label, LV_ALIGN_TOP_MID, 0, 0);
 
-    printf("Sistema: OFF\n");
     sprintf(s_puerta,"CLOSED");
 
     /*HOLA*/
@@ -45,6 +45,7 @@ void app_main(void)
 
 
 
+/*En esta funcion se crean las tareas que en este caso seran 3 para que el programa tenga un mejor fucionamiento*/
 esp_err_t create_tasks(void){
     static uint8_t ucParameterToPass;
     TaskHandle_t xHandle = NULL;
@@ -63,8 +64,17 @@ esp_err_t create_tasks(void){
                  1,
                  &xHandle);
 
+    xTaskCreate(vTasKFan,
+                "vTasKFan",
+                STACK_SIZE,
+                 &ucParameterToPass,
+                 1,
+                 &xHandle);
+
     return ESP_OK;
 }
+
+/*tarea #1*/
 
 void vTaskEntradas(void* pvParameters){
 
@@ -78,9 +88,19 @@ void vTaskEntradas(void* pvParameters){
 
 }
 
+/*tarea #2*/
 void vTasKAlarma(void* pvParameters){
     while(1){
         alarma();
+        vTaskDelay(pdMS_TO_TICKS(50));  
+    }
+
+}
+
+/*tarea #3*/
+void vTasKFan(void* pvParameters){
+    while(1){
+        fan();
         vTaskDelay(pdMS_TO_TICKS(50));  
     }
 

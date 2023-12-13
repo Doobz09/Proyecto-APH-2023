@@ -121,5 +121,6 @@ extern void actualizar_salidas(void);
 extern void init_adc(void);
 extern void imprimir_terminal(void);
 extern void alarma(void);
+extern void fan(void);
 
 #endif
