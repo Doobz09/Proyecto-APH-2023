@@ -12,6 +12,7 @@
 #include "lvgl.h"
 #include "esp_lvgl_port.h"
 #include "driver/adc.h"
+#include "driver/uart.h"
 #include <math.h>
 #include<string.h>
 #include"GPIO.h"
@@ -33,6 +34,14 @@ enum COOLSTATE{
 
 };
 #define S_IN BTN2
+#define S_OUT GPIO15
+#define BTN_AUTO_ON GPIO23
+#define BTN_COOL_HEAT GPIO27
+
+
+#define TXD_PIN (UART_PIN_NO_CHANGE)
+#define RXD_PIN (UART_PIN_NO_CHANGE)
+#define BAUD_RATE 9600
 
 #if CONFIG_EXAMPLE_LCD_CONTROLLER_SH1107
 #include "esp_lcd_sh1107.h"
@@ -122,5 +131,5 @@ extern void init_adc(void);
 extern void imprimir_terminal(void);
 extern void alarma(void);
 extern void fan(void);
-
+extern void init_uart(void);
 #endif

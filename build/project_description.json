@@ -1,7 +1,7 @@
 {
     "version":            "1",
     "project_name":       "i2c_oled",
-    "project_version":    "9799cfc-dirty",
+    "project_version":    "17893d8-dirty",
     "project_path":       "C:/Users/mende/Documents/ESP32_IDF/I2c-Oled/i2c_oled",
     "idf_path":           "C:/ESP32/esp-idf",
     "build_dir":          "C:/Users/mende/Documents/ESP32_IDF/I2c-Oled/i2c_oled/build",
