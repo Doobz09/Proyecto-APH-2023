@@ -23,7 +23,7 @@ uint32_t mensaje_temperatura=off;
 
 uint32_t tem_min=19;
 uint32_t tem_max=30;
-uint32_t set_point=24;
+uint32_t set_point=30;
 /***************************************/
 uint32_t estado_alarma=off;
 
@@ -344,10 +344,8 @@ void imprimir_oled(lv_obj_t *label){
         sprintf(state,"  Ctrl De Acceso  \n\n  ->Sistema: OFF");/*Esto solo se imprime cuando el estado del sistema es == off*/
         lv_label_set_text(label, state);                        
         bandera=1;
-
     }
     
-
     if(EstadoSistema==on){/*cuan el estado del sistema == on se imprimen todos los demas datos por la oled*/
 
         if(EstadoPuerta==on){          /*Esto deberia estar en actualizar salidas */
@@ -356,8 +354,6 @@ void imprimir_oled(lv_obj_t *label){
         else
             sprintf(s_puerta,"Closed");/*en caso contrario se escribe closed, este arreglo de pasa a las pantallas, terminal para su impresion */
         /************************************************************************/
-
-
         if(mensaje_temperatura==on){
             lv_label_set_text(label, "\n\nTemp_Out_Of_Range");/*si la bandera mensaje_temperatura == on esta activa se imprime esto y se omite lo otro*/
         }                                                  /*el tiempo de la impresion del texto esta establecido en la funcion imprimirTerminal*/
@@ -371,8 +367,6 @@ void imprimir_oled(lv_obj_t *label){
             sprintf(state," Tc:%ld°c   Ta:%.1f°c\n Door:%s\n Fan:%s/%s\n        %ld de %ld",temp_corporal,temp,s_puerta,s_auto,s_cool,espacio_ahora_personas,espacio_total_personas);
             lv_label_set_text(label, state);
         }
-
-        
 
     }
 

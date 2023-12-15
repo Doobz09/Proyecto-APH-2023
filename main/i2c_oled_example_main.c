@@ -86,10 +86,7 @@ void vTaskEntradas(void* pvParameters){
     while(1){
         actualizar_entradas();
         vTaskDelay(pdMS_TO_TICKS(50));
-
     }
-    
-
 
 }
 
