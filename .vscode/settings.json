@@ -15,7 +15,7 @@
     "streambuf": "c",
     "regex": "c"
   },
-  "idf.portWin": "COM6",
+  "idf.portWin": "COM7",
   "idf.flashType": "UART",
   "idf.adapterTargetName": "esp32"
 }

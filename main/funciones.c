@@ -21,8 +21,8 @@ uint32_t mensaje_temperatura=off;
 /*****************************************/
        /*ESTOS VALORES SE PUEDEN AJUSTAR Y MODIFICARIAN EL FUNCIONAMIENTO DEL PROGRAMA */
 
-uint32_t tem_min=19;
-uint32_t tem_max=30;
+uint32_t tem_min=10;
+uint32_t tem_max=40;
 uint32_t set_point=30;
 /***************************************/
 uint32_t estado_alarma=off;
